@@ -1,0 +1,21 @@
+name: CreativeRequests
+version: 1.0.0
+main: dev.nobleskye.creative.CreativeRequests
+api-version: 1.21
+description: Allows players to request creative mode, which staff can approve or deny
+commands:
+  request:
+    description: Request creative mode
+    usage: /request creative
+    permission: creativerequests.request
+  requests:
+    description: View and manage creative mode requests
+    usage: /requests [approve|deny] [player]
+    permission: creativerequests.admin
+permissions:
+  creativerequests.request:
+    description: Allows players to request creative mode
+    default: true
+  creativerequests.admin:
+    description: Allows admins to approve or deny creative mode requests
+    default: op
