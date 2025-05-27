@@ -4,6 +4,7 @@ main: dev.nobleskye.creative.CreativeRequests
 api-version: 1.21
 authors: [NobleSkye, SkyeNetwork Team]
 modrinth-project-id: "URPAGctY"
+github-repo: "SkyeNetMC/CreativeRequests"
 description: Allows players to request creative mode, which staff can approve or deny
 commands:
   request:
