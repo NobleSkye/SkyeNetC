@@ -28,9 +28,14 @@ jobs:
         
     - name: Make gradlew executable
       run: chmod +x ./gradlew
+    
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v2
         
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
+      with:
+        gradle-home-cache-cleanup: true
       
     - name: Cache Gradle dependencies
       uses: actions/cache@v4
@@ -42,14 +47,26 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     
+    - name: Clean Gradle cache
+      run: |
+        rm -rf ~/.gradle/caches/*/executionHistory/
+        rm -rf ~/.gradle/caches/*/fileHashes/
+        rm -rf ~/.gradle/caches/*/fileContent/
+    
     - name: Build with Gradle
-      run: ./gradlew clean shadowJar
+      run: ./gradlew --no-daemon --stacktrace clean shadowJar
+      
+    - name: Fallback build with Maven (if Gradle fails)
+      if: failure()
+      run: mvn clean package
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: CreativeRequests-Plugin
-        path: build/libs/CreativeRequests-*.jar
+        path: |
+          build/libs/CreativeRequests-*.jar
+          target/CreativeRequests-*.jar
         if-no-files-found: error
 
     - name: Check commit message
@@ -69,7 +86,9 @@ jobs:
       if: steps.check_commit.outputs.is_release == 'true'
       uses: softprops/action-gh-release@v2
       with:
-        files: build/libs/CreativeRequests-*.jar
+        files: |
+          build/libs/CreativeRequests-*.jar
+          target/CreativeRequests-*.jar
         tag_name: v${{ steps.check_commit.outputs.version }}
         name: Release ${{ steps.check_commit.outputs.version }}
         draft: false
@@ -80,7 +99,9 @@ jobs:
       if: steps.check_commit.outputs.is_release != 'true'
       uses: softprops/action-gh-release@v2
       with:
-        files: build/libs/CreativeRequests-*.jar
+        files: |
+          build/libs/CreativeRequests-*.jar
+          target/CreativeRequests-*.jar
         tag_name: beta-${{ github.sha }}
         name: Beta Build ${{ steps.check_commit.outputs.version }}
         draft: false
