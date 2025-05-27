@@ -5,7 +5,9 @@ A Paper plugin for Minecraft 1.21.4 that allows players to request creative mode
 ## Features
 
 - **Player Request System**: Players can request creative mode with optional reasoning
+- **Join Message**: Players are welcomed with information about creative requests when they join
 - **Admin Management**: Staff can view, approve, and deny requests through simple commands
+- **Enhanced List Command**: View pending, approved, denied, or all requests with detailed history
 - **Persistent Storage**: All requests are saved to YAML files for persistence across server restarts
 - **Configurable Settings**: Customize plugin behavior through config.yml
 - **Permission-Based**: Secure permission system to control access
@@ -13,7 +15,7 @@ A Paper plugin for Minecraft 1.21.4 that allows players to request creative mode
 
 ## Installation
 
-1. Download the `CreativeRequests-1.0.0.jar` file
+1. Download the `CreativeRequests-1.2.1.jar` file
 2. Place it in your Paper 1.21.4 server's `plugins/` folder
 3. Start or restart your server
 4. Configure permissions for your players and staff
@@ -36,10 +38,17 @@ A Paper plugin for Minecraft 1.21.4 that allows players to request creative mode
 
 ### For Staff/Admins
 
-#### `/requests`
-- **Description**: View all pending creative mode requests
+#### `/requests [list [type]]`
+- **Description**: View creative mode requests by type
 - **Permission**: `creativerequests.admin` (default: op)
-- **Shows**: Player name, reason (if provided), and timestamp of each request
+- **Usage Examples**:
+  - `/requests` - View all pending requests (default)
+  - `/requests list` - View all pending requests
+  - `/requests list pending` - View only pending requests
+  - `/requests list approved` - View only approved requests
+  - `/requests list denied` - View only denied requests
+  - `/requests list all` - View all requests (pending, approved, and denied)
+- **Shows**: Player name, reason (if provided), timestamp, and action dates for each request
 
 #### `/requests approve <player>`
 - **Description**: Approve a player's creative mode request
@@ -99,32 +108,45 @@ plugins/CreativeRequests/
 
 ## Workflow Example
 
-1. **Player makes a request**:
+1. **Player joins the server**:
+   ```
+   Welcome! Need creative mode? Use /request creative to get creative!
+   ```
+
+2. **Player makes a request**:
    ```
    Player: /request creative Building a castle for the community
    System: ✅ Your creative mode request has been submitted!
    ```
 
-2. **Admin receives notification** (if enabled):
+3. **Admin receives notification** (if enabled):
    ```
    [Admin] Steve has requested creative mode: Building a castle for the community
    ```
 
-3. **Admin reviews requests**:
+4. **Admin reviews requests**:
    ```
    Admin: /requests
    System: === Pending Creative Requests ===
            Steve: Building a castle for the community (2 minutes ago)
+   
+   Admin: /requests list approved
+   System: === Approved Creative Requests ===
+           Alex: Building spawn area (approved 1 hour ago)
+   
+   Admin: /requests list all
+   System: === ALL CREATIVE MODE REQUESTS ===
+           [Shows pending, approved, and denied requests]
    ```
 
-4. **Admin approves the request**:
+5. **Admin approves the request**:
    ```
    Admin: /requests approve Steve
    System: ✅ Steve's creative mode request has been approved
    Player receives: ✅ Your creative mode request has been approved!
    ```
 
-5. **Automatic return to survival** (if configured):
+6. **Automatic return to survival** (if configured):
    ```
    After 60 minutes: Steve has been returned to survival mode
    ```
@@ -168,7 +190,7 @@ For issues, suggestions, or contributions:
 
 ## Version
 
-Current version: 1.0.0
+Current version: 1.2.1
 
 ---
 

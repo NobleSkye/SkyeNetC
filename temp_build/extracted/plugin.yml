@@ -1,5 +1,5 @@
 name: CreativeRequests
-version: 1.2.1
+version: 1.2.0
 main: dev.nobleskye.creative.CreativeRequests
 api-version: 1.21
 authors: [NobleSkye, SkyeNetwork Team]
@@ -11,8 +11,8 @@ commands:
     usage: /request creative
     permission: creativerequests.request
   requests:
-    description: View and manage creative mode requests
-    usage: /requests [approve|deny <player>|list [pending|approved|denied|all]]
+    description: View and manage creative mode requests. Use /requests list [pending|approved|denied|all] to filter.
+    usage: /requests [list [pending|approved|denied|all]|approve|deny] [player]
     permission: creativerequests.admin
 permissions:
   creativerequests.request:

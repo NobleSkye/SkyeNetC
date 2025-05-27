@@ -1,14 +1,23 @@
 package dev.nobleskye.creative;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class CreativeRequests extends JavaPlugin {
+public class CreativeRequests extends JavaPlugin implements Listener {
     private File requestsFile;
     private YamlConfiguration requestsConfig;
     
@@ -31,6 +40,9 @@ public class CreativeRequests extends JavaPlugin {
         // Register commands
         getCommand("request").setExecutor(new RequestCommand(this));
         getCommand("requests").setExecutor(new RequestsCommand(this));
+        
+        // Register events
+        getServer().getPluginManager().registerEvents(this, this);
         
         getLogger().info("CreativeRequests has been enabled!");
     }
@@ -114,6 +126,55 @@ public class CreativeRequests extends JavaPlugin {
         return requestMap;
     }
     
+    public List<RequestData> getPendingRequests() {
+        return new ArrayList<>(getRequests().values());
+    }
+    
+    public Map<String, RequestData> getApprovedRequests() {
+        var requests = requestsConfig.getConfigurationSection("requests");
+        Map<String, RequestData> requestMap = new HashMap<>();
+        
+        if (requests == null) return requestMap;
+        
+        for (String playerName : requests.getKeys(false)) {
+            if (requests.getBoolean(playerName + ".approved", false) && 
+                !requests.getBoolean(playerName + ".pending", false)) {
+                long timestamp = requests.getLong(playerName + ".timestamp");
+                long approvedAt = requests.getLong(playerName + ".approvedAt");
+                String reason = requests.getString(playerName + ".reason", "No reason provided");
+                
+                RequestData data = new RequestData(playerName, reason, timestamp);
+                data.setApprovedAt(approvedAt);
+                requestMap.put(playerName, data);
+            }
+        }
+        
+        return requestMap;
+    }
+    
+    public Map<String, RequestData> getDeniedRequests() {
+        var requests = requestsConfig.getConfigurationSection("requests");
+        Map<String, RequestData> requestMap = new HashMap<>();
+        
+        if (requests == null) return requestMap;
+        
+        for (String playerName : requests.getKeys(false)) {
+            if (!requests.getBoolean(playerName + ".approved", false) && 
+                !requests.getBoolean(playerName + ".pending", false) &&
+                requests.contains(playerName + ".deniedAt")) {
+                long timestamp = requests.getLong(playerName + ".timestamp");
+                long deniedAt = requests.getLong(playerName + ".deniedAt");
+                String reason = requests.getString(playerName + ".reason", "No reason provided");
+                
+                RequestData data = new RequestData(playerName, reason, timestamp);
+                data.setDeniedAt(deniedAt);
+                requestMap.put(playerName, data);
+            }
+        }
+        
+        return requestMap;
+    }
+    
     public boolean approveRequest(String playerName) {
         var requests = requestsConfig.getConfigurationSection("requests");
         if (requests == null) return false;
@@ -150,6 +211,43 @@ public class CreativeRequests extends JavaPlugin {
         var requests = requestsConfig.getConfigurationSection("requests");
         if (requests == null) return false;
         return requests.getBoolean(playerName + ".pending", false);
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        
+        // Send join message to player about creative requests
+        player.sendMessage(Component.empty());
+        player.sendMessage(
+            Component.text("Welcome! ").color(NamedTextColor.GREEN)
+                .append(Component.text("Need creative mode? Use ").color(NamedTextColor.YELLOW))
+                .append(Component.text("/request creative").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                .append(Component.text(" to get creative!").color(NamedTextColor.YELLOW))
+        );
+        player.sendMessage(Component.empty());
+        
+        // Notify moderators about pending requests
+        if (player.hasPermission("creativerequests.admin")) {
+            List<RequestData> pendingRequests = getPendingRequests();
+            if (!pendingRequests.isEmpty()) {
+                player.sendMessage(Component.empty());
+                player.sendMessage(
+                    Component.text("⚠ Moderator Alert ⚠").color(NamedTextColor.RED).decorate(TextDecoration.BOLD)
+                );
+                player.sendMessage(
+                    Component.text("There are ").color(NamedTextColor.YELLOW)
+                        .append(Component.text(pendingRequests.size()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(Component.text(" pending creative mode request(s)").color(NamedTextColor.YELLOW))
+                );
+                player.sendMessage(
+                    Component.text("Use ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("/requests list").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(Component.text(" to view them").color(NamedTextColor.YELLOW))
+                );
+                player.sendMessage(Component.empty());
+            }
+        }
     }
     
     // Getters for configuration
