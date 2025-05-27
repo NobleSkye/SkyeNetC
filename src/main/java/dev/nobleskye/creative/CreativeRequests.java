@@ -1,6 +1,8 @@
 package dev.nobleskye.creative;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -222,7 +224,11 @@ public class CreativeRequests extends JavaPlugin implements Listener {
         player.sendMessage(
             Component.text("Welcome! ").color(NamedTextColor.GREEN)
                 .append(Component.text("Need creative mode? Use ").color(NamedTextColor.YELLOW))
-                .append(Component.text("/request creative").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                .append(Component.text("/request creative")
+                    .color(NamedTextColor.GOLD)
+                    .decorate(TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.suggestCommand("/request creative "))
+                    .hoverEvent(HoverEvent.showText(Component.text("Click to suggest command"))))
                 .append(Component.text(" to get creative!").color(NamedTextColor.YELLOW))
         );
         player.sendMessage(Component.empty());
@@ -242,7 +248,11 @@ public class CreativeRequests extends JavaPlugin implements Listener {
                 );
                 player.sendMessage(
                     Component.text("Use ").color(NamedTextColor.YELLOW)
-                        .append(Component.text("/requests list").color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
+                        .append(Component.text("/requests list")
+                            .color(NamedTextColor.GOLD)
+                            .decorate(TextDecoration.BOLD)
+                            .clickEvent(ClickEvent.suggestCommand("/requests list"))
+                            .hoverEvent(HoverEvent.showText(Component.text("Click to view pending requests"))))
                         .append(Component.text(" to view them").color(NamedTextColor.YELLOW))
                 );
                 player.sendMessage(Component.empty());
